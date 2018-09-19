@@ -1,7 +1,16 @@
+import java.util.ArrayList;
+
 public class Main {
 
     public static void main(String[] args) {
+
         maxOneSubmatrixTabulated(originalMatrix);
+
+        int largestSubMatSize = maxOneSubmatrixMemoized(0, 0, originalMatrix,
+                new int[originalMatrix.length][originalMatrix[0].length]);
+        System.out.println("Largest matrix of size: " + overAllMax + " x " + overAllMax +
+                " at (" + (overAllRow + 1) + ", " + (overAllCol + 1) + ")");
+
     }
 
     // the original 6 x 6 matrix
@@ -21,8 +30,8 @@ public class Main {
 
         // variables to store the details of the largest sub-matrix
         int overAllMax = 0;
-        int overAllRow = 0;
-        int overAllCol = 0;
+        int overAllRow = -1;
+        int overAllCol = -1;
 
         for (int r = lastRow; r >= 0; r--) {
             for (int c = lastCol; c >= 0; c--) {
@@ -58,5 +67,45 @@ public class Main {
                 " at (" + (overAllRow + 1) + ", " + (overAllCol + 1) + ")");
     }
 
-    
+    private static int overAllMax = 0;
+    private static int overAllRow = -1;
+    private static int overAllCol = -1;
+
+    public static int maxOneSubmatrixMemoized(int row, int col, int[][] originalMatrix, int[][] memArray) {
+        int lastRow = originalMatrix.length - 1;
+        int lastCol = originalMatrix[0].length - 1;
+
+        if (row == lastRow || col == lastCol) { // handling the edges case
+            return originalMatrix[row][col];
+        }
+
+
+        // saving recalculations by returning already calculated values
+        if (memArray[row][col] != 0) {
+            return memArray[row][col];
+        }
+
+        // if the original matrix has a 0 somewhere, return 0
+        if (originalMatrix[row][col] == 0) {
+            return 0;
+        } else { // otherwise get faith values from vertical, horizontal and diagonal calls
+            int maxSubVert = maxOneSubmatrixMemoized(row + 1, col, originalMatrix, memArray);
+            int maxSubHoriz = maxOneSubmatrixMemoized(row, col + 1, originalMatrix, memArray);
+            int maxSubDiagonal = maxOneSubmatrixMemoized(row + 1, col + 1, originalMatrix, memArray);
+
+            // add 1 to their minimum and update results
+            int result = 1 + Math.min(maxSubDiagonal, Math.min(maxSubVert, maxSubHoriz));
+
+            if (result > overAllMax) {
+                overAllMax = result;
+                overAllRow = row;
+                overAllCol = col;
+            }
+
+            // store in memoization array for faster execution
+            memArray[row][col] = result;
+            return result;
+        }
+
+    }
 }
